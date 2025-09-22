@@ -230,11 +230,11 @@ const getAllCosplays = (req, res) => {
                 success:false,
                 message: "Data inválida",
             });
-        }
+        
         
 
 
-        const cosplaysAtualizados = cosplays.map(c => c.id === idParaEditar ? {
+         const cosplaysAtualizados = cosplays.map(c => c.id === idParaEditar ? {
             ...c,
             ...(personagem && { personagem }),
             ...(anime && { anime }),
@@ -243,19 +243,19 @@ const getAllCosplays = (req, res) => {
             ...(data && new Date(data) >= new Date() && { data }),
             ...(custo && { custo : parseInt (custo) }),
             ...(avaliacao && { avaliacao : parseInt (avaliacao) })
-        }
+         }
             : c 
-        );
+         );
     
-       cosplays.splice(0, cosplays.length, ...cosplaysAtualizados);
+         cosplays.splice(0, cosplays.length, ...cosplaysAtualizados);
     
-       const cosplayEditado = cosplays.find(c => c.id === idParaEditar);
-       return res.status(200).json({
-          success: true,
-          message: "Dados atualizados com sucesso do cosplay",
-          cosplay: cosplayEditado
-        })
-    }
+         const cosplayEditado = cosplays.find(c => c.id === idParaEditar);
+          return res.status(200).json({
+           success: true,
+           message: "Dados atualizados com sucesso do cosplay",
+           cosplay: cosplayEditado
+          })
+        }
     
     
 
