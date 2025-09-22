@@ -2,7 +2,7 @@ import dados from "../models/dados.js";
 const { cosplays } = dados;
 
 const getAllCosplays = (req, res) => {
-    const {personagem, anime, cosplayer, evento, data,custo, avaliacao, fotos} = req.query;
+    const {personagem, anime, cosplayer, evento, data ,custo, avaliacao, fotos} = req.query;
 
     let resultado = cosplays;
 
@@ -12,28 +12,17 @@ const getAllCosplays = (req, res) => {
     });
 
 
-    const personagemCosplay = ["Monkey D. Luffy", "Levi Ackerman", "Sailor Moon", "Goku Super Saiyajin", "Sakura Kinomoto", "Naruto Uzumaki", "Kenshin Himura", "Eren Yeager", "Gojo Satoru", "Inosuke Hashibira"];
-
-    const animeCosplay = ["One Piece", "Attack on Titan", "Sailor Moon", "Dragon Ball Z", "Cardcaptor Sakura", "Naruto Shippuden", "Samurai X", "Attack on Titan", "Jujutsu Kaisen", "Demon Slayer"];
-
-    const eventoCosplay = ["Anime Friends 2024", "Comic Con Experience 2023", "Geek City 2022", "Ressaca Friends 2024", "Anime Summit 2023", "BGS 2023", "Anime Friends 2023", "Geek City 2023", "Anime XP 2024", "Anime Friends 2024"];
-
-    const custoCosplay = ["R$ 550.00", "R$ 800.00", "R$ 420.00", "R$ 650.00", "R$ 380.00", "R$ 500.00", "R$ 720.00", "R$ 780.00", "R$ 900.00", "R$ 680.00"];
-
-
-
-
     //Filtros
       if (personagem) {
-        resultado = personagem.filter((p) => p.personagem.toLowerCase() === personagem.toLowerCase())
+        resultado = personagem.filter((c) => c.personagem.toLowerCase() === personagem.toLowerCase())
       }
     
       if (anime) {
-        resultado = anime.filter((a) => a.anime.toLowerCase() === anime.toLowerCase())
+        resultado = anime.filter((c) => c.anime.toLowerCase() === anime.toLowerCase())
       }
 
       if(evento) {
-        resultado = evento.filter((e) => e.evento.toLowerCase() === evento.toLowerCase())
+        resultado = evento.filter((c) => c.evento.toLowerCase() === evento.toLowerCase())
       }
 
       if(custo) {
@@ -97,7 +86,7 @@ const getAllCosplays = (req, res) => {
             });
          }
     
-          if (custo = 0 && custo < 0) {
+          if (custo < 0) {
             return res.status(400).json({
                 success: false,
                 message: "O campo 'custo' é obrigatório"
@@ -118,9 +107,8 @@ const getAllCosplays = (req, res) => {
         
         //Regra de negócios
 
-
         //Custo deve ser maior que 0 reais
-        if (custo < 0 || custo === 0 ) {
+        if (custo <= 0) {
             return res.status(404).json({
                 success:false,
                 message: "O custo não pode ser 0 reais e nem negativo",
@@ -129,7 +117,21 @@ const getAllCosplays = (req, res) => {
 
         //Data deve ser uma data válida e não pode ser futura
 
+        const dataEvento = ["2024-07-21", "2023-12-03", "2022-09-10", "2024-01-28", "2023-08-15", "2023-10-14", "2023-07-23", "2023-09-09", "2024-04-05", "2024-07-22"];
 
+        const datasValidas = data.toLocaleDateString();
+
+        const datasFuturas =  new Date();
+        datasFuturas.setDate(datasValidas.getDate() + 1);
+
+        if (datasFuturas > dataEvento || !dataEvento) {
+            return res.status(404).json({
+                success:false,
+                message: "Data inválida",
+            });
+        }
+        
+            
 
         const novoCosplay = {
             id:cosplays.length +1,
@@ -151,59 +153,111 @@ const getAllCosplays = (req, res) => {
             cosplay: novoCosplay
         });
     };
+  
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    const deleteCosplay = (req, res) => {
+        const id = parseInt(req.params.id);
+    
+        if(isNaN(id)){
+            return res.status(404).json({
+                success: false,
+                message: "O ID deve ser válido"
+            });
+        }
+    
+        const cosplayParaRemover = cosplays.find(c => c.id === id);
+    
+        if(!cosplayParaRemover) {
+            return res.status(404).json({
+                success: false,
+                message: `Cosplay com o id: ${id} não existe`
+            });
+        }
+    
+        const cosplaysFiltrados = cosplays.filter(c => c.id !== id);
+    
+        cosplays.splice(0, cosplays.length, ...cosplaysFiltrados);
+    
+        return res.status(200).json({
+            success: true,
+            message: `O Cosplay ${id} foi removido com sucesso`
+        });
+    };
 
      
+    const updateCosplay = (req, res) => {
+        const id = parseInt(req.params.id);
+        const { personagem , anime , cosplayer, evento , data , custo , avaliacao , fotos } = req.body;
+    
+          const idParaEditar = id;
+    
+        if(isNaN(idParaEditar)){
+            return res.status(404).json({
+                sucess: false, 
+                message: "o ID deve ser um número válido."
+            });
+        }
+     
+        const cosplayExiste = cosplays.find(c => c.id === idParaEditar);
+        if(!cosplayExiste){
+            return res.status(404).json({
+                sucess: false,
+                message: `O cosplay com o id: ${idParaEditar} não existe.`
+            });
+        };
 
+        //Regra de negócios
+
+        //Custo deve ser maior que 0 reais
+        if (custo <= 0) {
+            return res.status(404).json({
+                success:false,
+                message: "O custo não pode ser 0 reais e nem negativo",
+            });
+        };
+
+        //Data deve ser uma data válida e não pode ser futura
+
+        const dataEvento = ["2024-07-21", "2023-12-03", "2022-09-10", "2024-01-28", "2023-08-15", "2023-10-14", "2023-07-23", "2023-09-09", "2024-04-05", "2024-07-22"];
+
+        const datasValidas = data.toLocaleDateString();
+
+        const datasFuturas =  new Date();
+        datasFuturas.setDate(datasValidas.getDate() + 1);
+
+        if (datasFuturas > dataEvento || !dataEvento) {
+            return res.status(404).json({
+                success:false,
+                message: "Data inválida",
+            });
+        }
+        
+
+
+        const cosplaysAtualizados = cosplays.map(c => c.id === idParaEditar ? {
+            ...c,
+            ...(personagem && { personagem }),
+            ...(anime && { anime }),
+            ...(cosplayer && { cosplayer }),
+            ...(evento && { evento }),
+            ...(data && new Date(data) >= new Date() && { data }),
+            ...(custo && { custo : parseInt (custo) }),
+            ...(avaliacao && { avaliacao : parseInt (avaliacao) })
+        }
+            : c 
+        );
+    
+       cosplays.splice(0, cosplays.length, ...cosplaysAtualizados);
+    
+       const cosplayEditado = cosplays.find(c => c.id === idParaEditar);
+       return res.status(200).json({
+          success: true,
+          message: "Dados atualizados com sucesso do cosplay",
+          cosplay: cosplayEditado
+        })
+    }
+    
     
 
-    
 
-
-
-
- export { getAllCosplays, getCosplayById, createCosplay  };
+ export { getAllCosplays, getCosplayById, createCosplay, deleteCosplay, updateCosplay  };
